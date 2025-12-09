@@ -1,12 +1,10 @@
 <template>
-  <main class="layout">
-    hihi
-  <div  ref="rootRef">
+  <main class="layout" ref="rootRef">
     <section class="surface" data-playground-root data-cmd-container>
       <header>
         <h1>scoped-select-all Playground</h1>
         <p>
-          点击任意容器中的元素，然后使用 <kbd>⌘</kbd>/<kbd>Ctrl</kbd> + <kbd>A</kbd> 查看 profile 的行为差异。
+          点击任意容器中的元素，然后使用 <kbd>⌘</kbd>/<kbd>Ctrl</kbd> + <kbd>A</kbd> 观察不同 profile 与嵌套容器的行为。
         </p>
         <div class="status-grid">
           <div>
@@ -94,6 +92,150 @@
             </li>
           </ul>
         </section>
+
+        <section
+          class="container"
+          data-cmd-container
+          data-container-id="board"
+          data-type="board"
+          :class="{ 'is-active': isContainerActive('board') }"
+        >
+          <h2>看板容器</h2>
+          <p>展示父级（board）、列（column）以及子任务（subtasks）三个层级的 profile。</p>
+          <div class="board">
+            <article
+              v-for="column in boardColumns"
+              :key="column.id"
+              class="board-column"
+              data-cmd-container
+              :data-container-id="`column-${column.id}`"
+              data-type="column"
+              :class="{ 'is-active': isContainerActive(`column-${column.id}`) }"
+            >
+              <header>
+                <div class="column-title">{{ column.title }}</div>
+                <span class="column-hint">{{ column.description }}</span>
+              </header>
+              <div class="board-tasks">
+                <article
+                  v-for="task in column.tasks"
+                  :key="task.id"
+                  class="task-card"
+                  data-selectable
+                  data-task
+                  :data-node="task.id"
+                  :data-disabled="task.disabled ? '' : null"
+                  :class="{ 'is-selected': isSelected(task.id), 'is-muted': task.disabled }"
+                  @click="handleElementClick(task.id, $event)"
+                >
+                  <header>
+                    <div class="task-title">{{ task.title }}</div>
+                    <span class="task-badge" v-if="task.badge">{{ task.badge }}</span>
+                  </header>
+                  <p>{{ task.detail }}</p>
+                  <footer>
+                    <span class="task-meta">{{ task.meta }}</span>
+                  </footer>
+                  <div
+                    v-if="task.subtasks?.length"
+                    class="subtasks"
+                    data-cmd-container
+                    :data-container-id="`subtasks-${task.id}`"
+                    data-type="subtasks"
+                    :class="{ 'is-active': isContainerActive(`subtasks-${task.id}`) }"
+                  >
+                    <button
+                      v-for="subtask in task.subtasks"
+                      :key="subtask.id"
+                      type="button"
+                      class="subtask-item"
+                      data-selectable
+                      data-subtask
+                      :data-node="subtask.id"
+                      :class="{ 'is-selected': isSelected(subtask.id) }"
+                      @click.stop="handleElementClick(subtask.id, $event)"
+                    >
+                      <span>{{ subtask.text }}</span>
+                      <small>{{ subtask.time }}</small>
+                    </button>
+                  </div>
+                </article>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section
+          class="container"
+          data-cmd-container
+          data-container-id="doc"
+          data-type="doc"
+          :class="{ 'is-active': isContainerActive('doc') }"
+        >
+          <h2>文档容器</h2>
+          <p>混合段落、引用、代码块与 checklist，同时可以忽略 <code>data-locked</code> 的节点。</p>
+          <article class="doc-article">
+            <template v-for="block in docBlocks" :key="block.id">
+              <p
+                v-if="block.type === 'paragraph'"
+                class="doc-block"
+                data-selectable
+                data-doc-node
+                :data-node="block.id"
+                :class="{ 'is-selected': isSelected(block.id) }"
+                @click="handleElementClick(block.id, $event)"
+              >
+                {{ block.text }}
+              </p>
+
+              <div
+                v-else-if="block.type === 'quote'"
+                class="doc-block doc-quote"
+                data-cmd-container
+                :data-container-id="`quote-${block.id}`"
+                data-type="quote"
+                :class="{ 'is-active': isContainerActive(`quote-${block.id}`) }"
+              >
+                <p
+                  v-for="line in block.lines"
+                  :key="line.id"
+                  data-selectable
+                  data-quote-line
+                  :data-node="line.id"
+                  :class="{ 'is-selected': isSelected(line.id) }"
+                  @click="handleElementClick(line.id, $event)"
+                >
+                  {{ line.text }}
+                </p>
+              </div>
+
+              <ul v-else-if="block.type === 'checklist'" class="doc-block doc-checklist">
+                <li v-for="item in block.items" :key="item.id">
+                  <span
+                    data-selectable
+                    data-doc-node
+                    :data-node="item.id"
+                    :data-locked="item.locked ? '' : null"
+                    :class="{ 'is-selected': isSelected(item.id), 'is-muted': item.locked }"
+                    @click="handleElementClick(item.id, $event)"
+                  >
+                    <input type="checkbox" :checked="item.done" disabled />
+                    {{ item.text }}
+                  </span>
+                </li>
+              </ul>
+
+              <pre
+                v-else-if="block.type === 'code'"
+                class="doc-block doc-code"
+                data-selectable
+                data-doc-node
+                :data-node="block.id"
+                @click="handleElementClick(block.id, $event)"
+              ><code>{{ block.code }}</code></pre>
+            </template>
+          </article>
+        </section>
       </div>
     </section>
 
@@ -106,7 +248,6 @@
         <li v-for="log in logs" :key="log.id">{{ formatLog(log) }}</li>
       </ol>
     </aside>
-    </div>
   </main>
 </template>
 
@@ -122,6 +263,35 @@ type LogEntry = {
   detail: string
   time: Date
 }
+
+type BoardSubTask = {
+  id: string
+  text: string
+  time: string
+}
+
+type BoardTask = {
+  id: string
+  title: string
+  detail: string
+  meta: string
+  badge?: string
+  disabled?: boolean
+  subtasks?: BoardSubTask[]
+}
+
+type BoardColumn = {
+  id: string
+  title: string
+  description: string
+  tasks: BoardTask[]
+}
+
+type DocBlock =
+  | { id: string; type: 'paragraph'; text: string }
+  | { id: string; type: 'quote'; lines: Array<{ id: string; text: string }> }
+  | { id: string; type: 'checklist'; items: Array<{ id: string; text: string; done: boolean; locked?: boolean }> }
+  | { id: string; type: 'code'; code: string }
 
 const rootRef = ref<HTMLElement | null>(null)
 const activeTarget = ref('无')
@@ -153,6 +323,76 @@ const listItems = [
   { id: 'L3', text: '列表项 3（忽略）', disabled: true },
 ]
 
+const boardColumns: BoardColumn[] = [
+  {
+    id: 'todo',
+    title: 'Todo',
+    description: '规划中的任务',
+    tasks: [
+      {
+        id: 'task-ux',
+        title: '设计新的表格选择交互',
+        detail: '调研竞品并整理交互稿',
+        meta: 'Due 今天 14:00',
+        badge: '高优',
+        subtasks: [
+          { id: 'task-ux-1', text: '竞品走查', time: '09:30' },
+          { id: 'task-ux-2', text: '输出交互稿', time: '11:00' },
+        ],
+      },
+      {
+        id: 'task-api',
+        title: '整理 Cmd+A API 文档',
+        detail: '区分容器与 profile 的使用方式',
+        meta: '2 comments',
+        disabled: true,
+      },
+    ],
+  },
+  {
+    id: 'doing',
+    title: 'Doing',
+    description: '开发进行中',
+    tasks: [
+      {
+        id: 'task-vue-playground',
+        title: 'Vue Playground 增强',
+        detail: '补充嵌套列、子任务与富文本场景',
+        meta: 'PR #128',
+        subtasks: [
+          { id: 'task-vue-playground-1', text: '子任务 profile', time: '13:20' },
+        ],
+      },
+    ],
+  },
+]
+
+const docBlocks: DocBlock[] = [
+  { id: 'doc-p-1', type: 'paragraph', text: '在一个复杂的富文本编辑器里，容器之间可能存在嵌套关系，需要 profile 分流。' },
+  {
+    id: 'doc-quote-1',
+    type: 'quote',
+    lines: [
+      { id: 'doc-quote-1-line-1', text: '“顶层容器可以决定全选的范围”' },
+      { id: 'doc-quote-1-line-2', text: '—— Product Team' },
+    ],
+  },
+  {
+    id: 'doc-checklist-1',
+    type: 'checklist',
+    items: [
+      { id: 'doc-check-1', text: '对齐 Cmd+A 规则', done: true },
+      { id: 'doc-check-2', text: '补充 fallback 机制', done: true, locked: true },
+      { id: 'doc-check-3', text: '增加 playground 场景', done: false },
+    ],
+  },
+  {
+    id: 'doc-code-1',
+    type: 'code',
+    code: `setupCmdA({\n  profiles: [\n    { test: isTable, select: pickCells },\n    { test: isDoc, filter: block => !block.locked },\n  ],\n})`,
+  },
+]
+
 onMounted(() => {
   if (!rootRef.value)
     return
@@ -178,9 +418,40 @@ function buildProfiles(): CmdAProfile[] {
       select: container => container.querySelectorAll('td[data-selectable], td [data-selectable]'),
     },
     {
+      priority: 18,
+      test: container => container.getAttribute('data-type') === 'board',
+      select: container => container.querySelectorAll('[data-task][data-selectable]'),
+    },
+    {
+      priority: 17,
+      test: container => container.getAttribute('data-type') === 'column',
+      select: container => container.querySelectorAll('[data-task][data-selectable]'),
+      filter: element => !element.hasAttribute('data-disabled'),
+    },
+    {
+      priority: 25,
+      test: container => container.getAttribute('data-type') === 'subtasks',
+      select: container => container.querySelectorAll('[data-subtask]'),
+      includeContainer: false,
+      applySelection: false,
+    },
+    {
       priority: 15,
       test: container => container.getAttribute('data-type') === 'card',
       select: container => container.querySelectorAll('[data-selectable]'),
+      includeContainer: false,
+      applySelection: false,
+    },
+    {
+      priority: 9,
+      test: container => container.getAttribute('data-type') === 'doc',
+      select: container => container.querySelectorAll('[data-doc-node]'),
+      filter: element => !element.hasAttribute('data-locked'),
+    },
+    {
+      priority: 10,
+      test: container => container.getAttribute('data-type') === 'quote',
+      select: container => container.querySelectorAll('[data-quote-line]'),
       includeContainer: false,
       applySelection: false,
     },

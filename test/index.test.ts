@@ -424,6 +424,29 @@ describe('handleCmdA', () => {
     expect(profileFilter).toHaveBeenCalled()
   })
 
+  it('ignores Cmd+A events that originate outside the configured scope', () => {
+    const tree = createTableTree()
+    const doc = new FakeDocument()
+    const outsideRaw = new FakeElement('section')
+    const outside = castElement(outsideRaw)
+    const outsideText = new FakeTextNode(outsideRaw)
+    doc.activeElement = outside
+    doc.setSelection(outsideText as unknown as Node)
+    const event = createKeyEvent({
+      target: outside as unknown as EventTarget,
+    })
+
+    const result = handleCmdA(event, {
+      root: doc,
+      scope: tree.table,
+      matchContainer: matchTable,
+      select: selectCells,
+    })
+
+    expect(result).toBeNull()
+    expect(event.preventDefault).not.toHaveBeenCalled()
+  })
+
   it('keeps selection inside nested roots with filters and repeated triggers', () => {
     const doc = new FakeDocument()
     const tree = createNestedSelectionTree()

@@ -33,6 +33,7 @@ cleanup()
 - `onSelect`: 捕获 Cmd+A 后得到的容器与元素列表，方便做样式或数据处理。
 - `applySelection`: 默认会自动构造一个 `Range` 并调用原生 Selection，可传入 `false` 关闭，或传入函数自行处理（函数会拿到 `elements` 与 `root`）。
 - `profiles`: 按容器维度配置不同的选择策略，每个 profile 可单独定义 `test`、`select`、`filter`、`applySelection` 与 `onSelect`，并通过 `priority` 决定匹配顺序。
+- `scope`: 限制事件监听仅在特定 DOM 树内生效（默认与 `top` 相同），避免影响页面上其它区域的 Cmd+A。
 - `setupCmdA` 会在 `keydown` 阶段阻止默认行为，可通过 `preventDefault: false` 关闭。
 
 ### 容器解析 & Cmd+A 行为
@@ -103,6 +104,7 @@ pnpm --filter vue-playground dev   # 默认 http://localhost:5173
 - 不同容器触发各自的 profile，实时展示被选元素、profile 选择策略以及是否同步原生 Selection。
 - 组件内部通过响应式状态呈现当前点击节点、激活容器描边、事件日志等，方便排查嵌套层级问题。
 - 可搭配 `pnpm --filter vue-playground build` / `preview` 快速部署 demo。
+- 包含更复杂的场景：嵌套看板列与子任务、富文本（段落/引用/清单/代码）等组合，方便验证多级 profile 策略。
 
 ## :coffee:
 

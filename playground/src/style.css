@@ -147,6 +147,148 @@ td {
   border: 1px solid #e2e8f0;
 }
 
+.board {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.board-column {
+  min-width: 260px;
+  border: 1px dashed #cbd5f5;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #f8fafc;
+}
+
+.board-column header .column-title {
+  font-weight: 600;
+}
+
+.board-column .column-hint {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.board-tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.task-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.2s ease;
+}
+
+.task-card header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+}
+
+.task-badge {
+  font-size: 12px;
+  padding: 2px 6px;
+  background: #fee2e2;
+  border-radius: 999px;
+  color: #b91c1c;
+}
+
+.task-meta {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.task-card.is-muted {
+  opacity: 0.5;
+}
+
+.subtasks {
+  margin-top: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px dashed #cbd5f5;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.doc-article {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.doc-block {
+  border: 1px dashed #cbd5f5;
+  border-radius: 8px;
+  padding: 12px;
+  line-height: 1.5;
+  display: block;
+}
+
+.doc-quote {
+  background: #f1f5f9;
+}
+
+.doc-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.doc-checklist li span {
+  width: 100%;
+  justify-content: flex-start;
+  gap: 8px;
+  display: inline-flex;
+}
+
+.doc-checklist input {
+  pointer-events: none;
+}
+
+.doc-code {
+  background: #0f172a;
+  color: #e2e8f0;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  font-size: 13px;
+  overflow: auto;
+}
+
+.doc-code code {
+  white-space: pre;
+}
+
+.doc-quote p[data-selectable] {
+  display: block;
+}
+
+.subtask-item {
+  width: 100%;
+  justify-content: space-between;
+  font-size: 13px;
+  display: flex;
+}
+
+.is-muted {
+  opacity: 0.5;
+}
+
 .log-panel {
   max-height: calc(100vh - 48px);
   overflow: auto;

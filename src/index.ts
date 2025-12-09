@@ -72,6 +72,7 @@ export interface CmdAOptions extends ContainerOptions, SelectionOptions {
   matchEvent?: (event: KeyboardEvent) => boolean
   applySelection?: CmdAApplySelection
   profiles?: CmdAProfile[]
+  scope?: Element | null | (() => Element | null)
 }
 
 export interface CmdAHandlerOptions extends CmdAOptions {
@@ -105,6 +106,11 @@ export function handleCmdA(
     return null
 
   const limit = resolveLimit(options.top)
+  const anchorNode = options.selectionNode ?? getSelectionAnchor(root)
+  const scopeElement = resolveScope(options.scope) ?? limit
+  if (scopeElement && !isEventWithinScope(scopeElement, event, root, anchorNode))
+    return null
+
   const isInsideTop = (candidate: Node | null | undefined) => {
     if (!limit)
       return true
@@ -124,7 +130,7 @@ export function handleCmdA(
     }
   }
 
-  pushCandidate(options.selectionNode ?? getSelectionAnchor(root))
+  pushCandidate(anchorNode)
   if (!options.selectionNode) {
     pushCandidate(event.target as Node | null | undefined)
     pushCandidate(root.activeElement ?? null)
@@ -400,6 +406,12 @@ function resolveLimit(limit?: Element | null | (() => Element | null)): Element 
   return limit ?? null
 }
 
+function resolveScope(scope?: Element | null | (() => Element | null)): Element | null {
+  if (typeof scope === 'function')
+    return scope() ?? null
+  return scope ?? null
+}
+
 function normalizeSelectors(selector?: string | string[]): string[] {
   if (!selector)
     return []
@@ -427,6 +439,20 @@ function isWithinLimit(element: Element, limit: Element): boolean {
     current = current.parentElement
   }
   return false
+}
+
+function isEventWithinScope(
+  scope: Element,
+  event: KeyboardEvent,
+  root: CmdARoot,
+  selectionNode?: Node | null,
+): boolean {
+  const candidates: (Element | null)[] = [
+    getElement(event.target as Node | null | undefined),
+    getElement(selectionNode),
+    root.activeElement ?? null,
+  ]
+  return candidates.some(element => element && isWithinLimit(element, scope))
 }
 
 function isElement(value: unknown): value is Element {

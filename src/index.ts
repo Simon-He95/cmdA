@@ -391,7 +391,7 @@ function resolveRoot(provided?: CmdARoot): CmdARoot {
     return provided
   if (typeof document !== 'undefined')
     return document
-  throw new Error('cmdA: document is not available. Provide options.root explicitly.')
+  throw new Error('scoped-select-all: document is not available. Provide options.root explicitly.')
 }
 
 function resolveLimit(limit?: Element | null | (() => Element | null)): Element | null {

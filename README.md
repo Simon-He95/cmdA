@@ -1,15 +1,15 @@
-## cmdA
-这个项目是一个全选的控制函数，当点击到某一个容器内，使用 cmdA 快捷键时，可以控制哪些元素被选中，到哪一层级，比如，点击到一个表格内，使用 cmdA 快捷键时，可以选择表格内的所有单元格，或者选择整张表格。
+## scoped-select-all
+这个项目是一个全选的控制函数，当点击到某一个容器内，使用 cmd+A 快捷键时，可以控制哪些元素被选中，到哪一层级，比如，点击到一个表格内，使用 cmd+A 快捷键时，可以选择表格内的所有单元格，或者选择整张表格。
 
 ## Usage
 
 ```ts
-import { setupCmdA } from 'cmdA'
+import { setupCmdA } from 'scoped-select-all'
 
 const cleanup = setupCmdA({
   // 限制查找范围，避免越界到编辑器外部
   top: () => document.querySelector('#editor-root'),
-  // 告诉 cmdA 哪些祖先元素算作可操作容器
+  // 告诉 scoped-select-all 哪些祖先元素算作可操作容器
   matchContainer: element => element.hasAttribute('data-cmd-a'),
   // 自定义要收集的元素集合
   select: container => container.querySelectorAll('[data-selectable]'),
@@ -37,7 +37,7 @@ cleanup()
 
 ### 容器解析 & Cmd+A 行为
 
-cmdA 会在 `top` 范围内优先使用以下顺序寻找容器：
+scoped-select-all 会在 `top` 范围内优先使用以下顺序寻找容器：
 
 1. 自定义的 `selectionNode`，其次是当前 Selection 的 anchor。
 2. 本次 `keydown` 的 `event.target` 与 `activeElement`。
@@ -50,7 +50,7 @@ cmdA 会在 `top` 范围内优先使用以下顺序寻找容器：
 如果你想在回调里自行决定如何操作 Selection，可以使用导出的 `applySelection` 工具：
 
 ```ts
-import { applySelection } from 'cmdA'
+import { applySelection } from 'scoped-select-all'
 
 setupCmdA({
   filter: element => element.tagName === 'TD',
@@ -68,7 +68,7 @@ setupCmdA({
 ### Profiles 示例
 
 ```ts
-import { setupCmdA } from 'cmdA'
+import { setupCmdA } from 'scoped-select-all'
 
 setupCmdA({
   matchContainer: el => el.closest('[data-editor]') !== null,
@@ -98,7 +98,7 @@ pnpm install
 pnpm --filter vue-playground dev   # 默认 http://localhost:5173
 ```
 
-该示例通过组件化的方式展示了嵌套表格 / 列表 / 卡片场景，并把 `cmdA` 当作 workspace 依赖直接引用源码，便于在 monorepo 下联调：
+该示例通过组件化的方式展示了嵌套表格 / 列表 / 卡片场景，并把 `scoped-select-all` 当作 workspace 依赖直接引用源码，便于在 monorepo 下联调：
 
 - 不同容器触发各自的 profile，实时展示被选元素、profile 选择策略以及是否同步原生 Selection。
 - 组件内部通过响应式状态呈现当前点击节点、激活容器描边、事件日志等，方便排查嵌套层级问题。

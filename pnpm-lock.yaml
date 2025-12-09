@@ -50,7 +50,7 @@ importers:
 
   playground:
     dependencies:
-      cmd_a:
+      scoped-select-all:
         specifier: workspace:*
         version: link:..
       vue:

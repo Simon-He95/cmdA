@@ -4,7 +4,7 @@
   <div  ref="rootRef">
     <section class="surface" data-playground-root data-cmd-container>
       <header>
-        <h1>cmdA Vue Playground</h1>
+        <h1>scoped-select-all Playground</h1>
         <p>
           点击任意容器中的元素，然后使用 <kbd>⌘</kbd>/<kbd>Ctrl</kbd> + <kbd>A</kbd> 查看 profile 的行为差异。
         </p>
@@ -112,7 +112,7 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
-import { setupCmdA, type CmdAResult, type CmdAProfile } from 'cmd_a'
+import { setupCmdA, type CmdAResult, type CmdAProfile } from 'scoped-select-all'
 
 type LogEntry = {
   id: string
